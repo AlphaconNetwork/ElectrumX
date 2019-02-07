@@ -254,7 +254,7 @@ class Coin(object):
         '''
         return Decimal(value) / cls.VALUE_PER_COIN
 
-class Blackcoin(Coin):
+class Alphacon(Coin):
     NAME = "Alphacon"
     SHORTNAME = "ALP"
     NET = "mainnet"
@@ -262,6 +262,7 @@ class Blackcoin(Coin):
     P2SH_VERBYTES = [bytes.fromhex("30")]
     WIF_BYTE = bytes.fromhex("24")
     GENESIS_HASH = ('00000bd194e16e8dc4bb9d3b6684c7757b203b3eec769e14e1492796736f304d')
+    DESERIALIZER = lib_tx.DeserializerTxTime
     DAEMON = daemon.LegacyRPCDaemon
     TX_COUNT = 1
     TX_COUNT_HEIGHT = 1
