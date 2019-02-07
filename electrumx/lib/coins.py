@@ -268,3 +268,11 @@ class Blackcoin(Coin):
     TX_PER_BLOCK = 3
     RPC_PORT = 19428
     REORG_LIMIT = 5000
+
+    def grshash(data):
+        import groestlcoin_hash
+        return groestlcoin_hash.getHash(data, len(data))
+
+    @classmethod
+    def header_hash(cls, header):
+        return cls.grshash(header)
