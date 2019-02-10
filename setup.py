@@ -1,14 +1,13 @@
 import setuptools
-version = '1.9.1'
+version = '1.8.12'
 
 setuptools.setup(
     name='electrumX',
     version=version,
-    scripts=['electrumx_server', 'electrumx_rpc', 'electrumx_compact_history'],
+    scripts=['electrumx_server', 'electrumx_rpc'],
     python_requires='>=3.6',
     # via environment variables, in which case I've tested with 15.0.4
     # "x11_hash" package (1.4) is required to sync DASH network.
-    # "x13_hash" package is required to sync BitcoinPlus network.
     # "tribus_hash" package is required to sync Denarius network.
     # "blake256" package is required to sync Decred network.
     # "xevan_hash" package is required to sync Xuez network.

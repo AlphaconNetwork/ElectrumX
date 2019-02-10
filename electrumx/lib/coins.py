@@ -36,13 +36,13 @@ import struct
 from decimal import Decimal
 from hashlib import sha256
 from functools import partial
+import base64
 
 import electrumx.lib.util as util
 from electrumx.lib.hash import Base58, hash160, double_sha256, hash_to_hex_str
 from electrumx.lib.hash import HASHX_LEN, hex_str_to_hash
 from electrumx.lib.script import ScriptPubKey, OpCodes
 import electrumx.lib.tx as lib_tx
-import electrumx.lib.tx_dash as lib_tx_dash
 import electrumx.server.block_processor as block_proc
 import electrumx.server.daemon as daemon
 from electrumx.server.session import (ElectrumX, DashElectrumX,
@@ -253,6 +253,16 @@ class Coin(object):
         For example 1 BTC is returned for 100 million satoshis.
         '''
         return Decimal(value) / cls.VALUE_PER_COIN
+
+    @classmethod
+    def electrum_header(cls, header, height):
+        h = dict(zip(cls.HEADER_VALUES, cls.HEADER_UNPACK(header)))
+        # Add the height that is not present in the header itself
+        h['block_height'] = height
+        # Convert bytes to str
+        h['prev_block_hash'] = hash_to_hex_str(h['prev_block_hash'])
+        h['merkle_root'] = hash_to_hex_str(h['merkle_root'])
+        return h
 
 class Alphacon(Coin):
     NAME = "Alphacon"
