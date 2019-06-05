@@ -953,6 +953,32 @@ class ElectrumX(SessionBase):
         hashX = scripthash_to_hashX(scripthash)
         return await self.hashX_subscribe(hashX, scripthash)
 
+    async def scripthash_unspent_utxo(self, scripthash, amount = 0):
+        hashX = scripthash_to_hashX(scripthash)
+        balance = await self.get_balance(hashX)
+        listunspent = await self.hashX_listunspent(hashX)
+        unspent = []
+
+        if balance["confirmed"] >= int(amount):
+            current_amount = 0
+            for transaction in listunspent:
+                if transaction["height"] != 0:
+                    try:
+                        data = await self.transaction_get(transaction["tx_hash"], True)
+                        transaction["script"] = data["vout"][transaction["tx_pos"]]["scriptPubKey"]["hex"]
+                    except Exception as e:
+                        break
+
+                    current_amount += transaction["value"]
+                    unspent.append(transaction)
+                    if current_amount > int(amount):
+                        break
+
+        else:
+            return "Not enough funds"
+
+return utxos_result
+
     async def _merkle_proof(self, cp_height, height):
         max_height = self.db.db_height
         if not height <= cp_height <= max_height:
@@ -1233,6 +1259,7 @@ class ElectrumX(SessionBase):
             'blockchain.scripthash.get_history': self.scripthash_get_history,
             'blockchain.scripthash.get_mempool': self.scripthash_get_mempool,
             'blockchain.scripthash.listunspent': self.scripthash_listunspent,
+            'blockchain.scripthash.utxo': self.scripthash_unspent_utxo,
             'blockchain.scripthash.subscribe': self.scripthash_subscribe,
             'blockchain.transaction.broadcast': self.transaction_broadcast,
             'blockchain.transaction.get': self.transaction_get,
