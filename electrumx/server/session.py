@@ -977,7 +977,7 @@ class ElectrumX(SessionBase):
         else:
             return "Not enough funds"
 
-return utxos_result
+        return utxos_result
 
     async def _merkle_proof(self, cp_height, height):
         max_height = self.db.db_height
