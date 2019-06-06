@@ -954,7 +954,7 @@ class ElectrumX(SessionBase):
         return await self.hashX_subscribe(hashX, scripthash)
 
     async def address_unspent_utxo(self, address, amount = 0):
-        hashX = address_to_hashX(address)
+        hashX = self.address_to_hashX(address)
         balance = await self.get_balance(hashX)
         listunspent = await self.hashX_listunspent(hashX)
         unspent = []
