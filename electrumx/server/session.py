@@ -977,7 +977,7 @@ class ElectrumX(SessionBase):
         else:
             return "Not enough funds"
 
-        return utxos_result
+        return unspent
 
     async def transaction_get_verbose(self, tx_hash, vin_start=0, vin_offset=20, vin_load=1):
         assert_tx_hash(tx_hash)
