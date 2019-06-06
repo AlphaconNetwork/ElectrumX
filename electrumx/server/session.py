@@ -953,8 +953,8 @@ class ElectrumX(SessionBase):
         hashX = scripthash_to_hashX(scripthash)
         return await self.hashX_subscribe(hashX, scripthash)
 
-    async def scripthash_unspent_utxo(self, scripthash, amount = 0):
-        hashX = scripthash_to_hashX(scripthash)
+    async def address_unspent_utxo(self, address, amount = 0):
+        hashX = address_to_hashX(address)
         balance = await self.get_balance(hashX)
         listunspent = await self.hashX_listunspent(hashX)
         unspent = []
@@ -978,6 +978,26 @@ class ElectrumX(SessionBase):
             return "Not enough funds"
 
         return utxos_result
+
+    async def transaction_inputs(self, tx_hash):
+        self.assert_tx_hash(tx_hash)
+        tx_data = await self.daemon_request('getrawtransaction', tx_hash, True)
+        tx_data["amount"] = 0
+        tx_data["vin_count"] = len(tx_data["vin"])
+        tx_data["vout_count"] = len(tx_data["vout"])
+
+        for index, vin in enumerate(tx_data["vin"]):
+            tx_data["vin"][index]["vin_index"] = index
+
+        for index, vout in enumerate(tx_data["vout"]):
+            tx_data["vout"][index]["vout_index"] = index
+
+        for tx in tx_data["vout"]:
+            tx_data["amount"] += tx["valueSat"]
+
+        tx_data["vin"] = await self.process_vin(tx_data["vin"])
+
+        return tx_data
 
     async def _merkle_proof(self, cp_height, height):
         max_height = self.db.db_height
@@ -1259,8 +1279,9 @@ class ElectrumX(SessionBase):
             'blockchain.scripthash.get_history': self.scripthash_get_history,
             'blockchain.scripthash.get_mempool': self.scripthash_get_mempool,
             'blockchain.scripthash.listunspent': self.scripthash_listunspent,
-            'blockchain.scripthash.utxo': self.scripthash_unspent_utxo,
             'blockchain.scripthash.subscribe': self.scripthash_subscribe,
+            'blockchain.address.utxo': self.address_unspent_utxo,
+            'blockchain.transaction.inputs': self.transaction_inputs,
             'blockchain.transaction.broadcast': self.transaction_broadcast,
             'blockchain.transaction.get': self.transaction_get,
             'blockchain.transaction.get_merkle': self.transaction_merkle,
