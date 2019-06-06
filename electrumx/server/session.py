@@ -980,7 +980,7 @@ class ElectrumX(SessionBase):
         return utxos_result
 
     async def transaction_get_verbose(self, tx_hash, vin_start=0, vin_offset=20, vin_load=1):
-        self.assert_tx_hash(tx_hash)
+        assert_tx_hash(tx_hash)
         tx_data = await self.daemon_request('getrawtransaction', tx_hash, True)
         tx_data["amount"] = 0
         tx_data["vin_count"] = len(tx_data["vin"])
