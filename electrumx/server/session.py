@@ -996,7 +996,7 @@ class ElectrumX(SessionBase):
             tx_data["vout"][index]["vout_index"] = index
 
         for tx in tx_data["vout"]:
-            tx_data["amount"] += tx["valueSat"]
+            tx_data["amount"] += int(tx["value"] * pow(10, 8))
 
         if vin_load:
             tx_data["vin"] = await self.process_vin(tx_data["vin"][int(vin_start):int(vin_start) + int(vin_offset)])
@@ -1009,7 +1009,7 @@ class ElectrumX(SessionBase):
                 data = await self.transaction_get_verbose(vin["txid"], 0, 0, 0)
 
                 vin_data[index]["value"] = data["vout"][vin["vout"]]["value"]
-                vin_data[index]["valueSat"] = data["vout"][vin["vout"]]["valueSat"]
+                vin_data[index]["value"] = int(data["vout"][vin["vout"]]["value"] * pow(10, 8))
                 if "scriptPubKey" in data["vout"][vin["vout"]]:
                     vin_data[index]["scriptPubKey"] = data["vout"][vin["vout"]]["scriptPubKey"]
 
@@ -1029,7 +1029,7 @@ class ElectrumX(SessionBase):
             tx_data["vout"][index]["vout_index"] = index
 
         for tx in tx_data["vout"]:
-            tx_data["amount"] += tx["valueSat"]
+            tx_data["amount"] += int(tx["value"] * pow(10, 8))
 
         tx_data["vin"] = await self.process_vin(tx_data["vin"])
 
