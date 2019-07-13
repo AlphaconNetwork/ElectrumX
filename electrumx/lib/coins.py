@@ -136,6 +136,13 @@ class Coin(object):
         '''
         if script and script[0] == OP_RETURN:
             return None
+
+        # CLTV script support
+        if len(script) > 27:
+            if script[-27] == 0xb1:
+                cltv_script = script[len(script) - 25:]
+                return sha256(cltv_script).digest()[:HASHX_LEN]
+
         return sha256(script).digest()[:HASHX_LEN]
 
     @staticmethod
