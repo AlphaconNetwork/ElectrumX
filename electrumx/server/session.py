@@ -883,6 +883,19 @@ class ElectrumX(SessionBase):
         hashX = self.address_to_hashX(address)
         return await self.get_balance(hashX)
 
+    async def address_get_balance_full(self, address):
+        '''Return the confirmed, unconfirmed, locked and token balance of an address.'''
+        data = await self.daemon_request('getaddressbalance', address)
+        tokens = await self.daemon_request('getaddressbalance', address, True)
+
+        for index, token in enumerate(tokens):
+            if token['tokenName'] == 'ALP':
+                del tokens[index]
+
+        data['tokens'] = tokens
+
+        return data
+
     async def address_get_history(self, address):
         '''Return the confirmed and unconfirmed history of an address.'''
         hashX = self.address_to_hashX(address)
@@ -1362,6 +1375,7 @@ class ElectrumX(SessionBase):
             handlers.update({
                 'blockchain.headers.subscribe': self.headers_subscribe_False,
                 'blockchain.address.get_balance': self.address_get_balance,
+                'blockchain.address.balance': self.address_get_balance_full,
                 'blockchain.address.get_history': self.address_get_history,
                 'blockchain.address.get_mempool': self.address_get_mempool,
                 'blockchain.address.listunspent': self.address_listunspent,

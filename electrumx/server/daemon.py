@@ -252,6 +252,10 @@ class Daemon(object):
         return await self._send_single('getrawtransaction',
                                        (hex_hash, int(verbose)))
 
+    async def getaddressbalance(self, address, with_assets=False):
+        return await self._send_single('getaddressbalance',
+                                       ({"addresses": [address]}, with_assets, ))
+
     async def getrawtransactions(self, hex_hashes, replace_errs=True):
         '''Return the serialized raw transactions with the given hashes.
 
