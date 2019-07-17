@@ -953,11 +953,13 @@ class ElectrumX(SessionBase):
         hashX = scripthash_to_hashX(scripthash)
         return await self.hashX_subscribe(hashX, scripthash)
 
-    async def address_unspent_utxo(self, address, amount = 0):
+    async def address_unspent_utxo(self, address, amount=0):
         hashX = self.address_to_hashX(address)
         balance = await self.get_balance(hashX)
         listunspent = await self.hashX_listunspent(hashX)
         unspent = []
+        height = self.db.db_height
+        timestamp = int(datetime.datetime.utcnow().strftime("%s"))
 
         if balance["confirmed"] >= int(amount):
             current_amount = 0
@@ -968,6 +970,18 @@ class ElectrumX(SessionBase):
                         transaction["script"] = data["vout"][transaction["tx_pos"]]["scriptPubKey"]["hex"]
                     except Exception as e:
                         break
+
+                    raw_script = bytearray.fromhex(transaction["script"])
+                    if len(raw_script) > 27:
+                        if raw_script[-27] == 0xb1:
+                            lock_time = int.from_bytes(raw_script[1:raw_script[0] + 1], byteorder='little')
+
+                            if lock_time < 500000000:
+                                if lock_time > height:
+                                    continue
+                            else:
+                                if lock_time > timestamp:
+                                    continue
 
                     current_amount += transaction["value"]
                     unspent.append(transaction)
