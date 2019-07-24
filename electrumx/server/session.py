@@ -987,7 +987,10 @@ class ElectrumX(SessionBase):
                     raw_script = bytearray.fromhex(transaction["script"])
                     if len(raw_script) > 27:
                         if raw_script[-27] == 0xb1:
-                            lock_time = int.from_bytes(raw_script[1:raw_script[0] + 1], byteorder='little')
+                            if len(raw_script) == 28:
+                                lock_time = int.from_bytes(raw_script[0], byteorder='little')
+                            else:
+                                lock_time = int.from_bytes(raw_script[1:raw_script[0] + 1], byteorder='little')
 
                             if lock_time < 500000000:
                                 if lock_time > height:
