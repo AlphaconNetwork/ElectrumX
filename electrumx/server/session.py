@@ -968,11 +968,15 @@ class ElectrumX(SessionBase):
         balance = await self.get_balance(hashX)
         listunspent = await self.hashX_listunspent(hashX)
         unspent = []
+        unspent_locked = []
+        unspent_locked_time = []
         height = self.db.db_height
         timestamp = int(datetime.datetime.utcnow().strftime("%s"))
 
         if balance["confirmed"] >= int(amount):
             current_amount = 0
+            current_amount_locked = 0
+            current_amount_locked_time = 0
             for transaction in listunspent:
                 if transaction["height"] != 0:
                     try:
@@ -982,23 +986,47 @@ class ElectrumX(SessionBase):
                         break
 
                     raw_script = bytearray.fromhex(transaction["script"])
-                    if len(raw_script) > 27:
+                    lock_time = 0
+
+                    if len(raw_script) > 28:
                         if raw_script[-27] == 0xb1:
-                            if len(raw_script) == 28:
-                                lock_time = int.from_bytes(raw_script[0], byteorder='little')
-                            else:
-                                lock_time = int.from_bytes(raw_script[1:raw_script[0] + 1], byteorder='little')
+                            lock_time = int.from_bytes(raw_script[1:raw_script[0] + 1], byteorder='little')
 
                             if lock_time < 500000000:
                                 if lock_time > height:
                                     continue
+
+                                else:
+                                    unspent_locked.append(transaction)
+                                    current_amount_locked += transaction["value"]
+                                    if current_amount + current_amount_locked >= int(amount):
+                                        unspent.append(unspent_locked)
+                                        break
+
+                                    if current_amount_locked >= int(amount):
+                                        unspent = unspent_locked
+                                        break
+
                             else:
                                 if lock_time > timestamp:
                                     continue
 
+                                else:
+                                    unspent_locked_time.append(transaction)
+                                    current_amount_locked_time += transaction["value"]
+                                    if current_amount + current_amount_locked_time >= int(amount):
+                                        unspent.append(unspent_locked_time)
+                                        break
+
+                                    if current_amount_locked_time >= int(amount):
+                                        unspent = unspent_locked_time
+                                        break
+
+                            continue
+
                     current_amount += transaction["value"]
                     unspent.append(transaction)
-                    if current_amount > int(amount):
+                    if current_amount >= int(amount):
                         break
 
         else:
