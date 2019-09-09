@@ -1000,7 +1000,7 @@ class ElectrumX(SessionBase):
                                     unspent_locked.append(transaction)
                                     current_amount_locked += transaction["value"]
                                     if current_amount + current_amount_locked >= int(amount):
-                                        unspent.append(unspent_locked)
+                                        unspent += unspent_locked
                                         break
 
                                     if current_amount_locked >= int(amount):
@@ -1015,7 +1015,7 @@ class ElectrumX(SessionBase):
                                     unspent_locked_time.append(transaction)
                                     current_amount_locked_time += transaction["value"]
                                     if current_amount + current_amount_locked_time >= int(amount):
-                                        unspent.append(unspent_locked_time)
+                                        unspent += unspent_locked_time
                                         break
 
                                     if current_amount_locked_time >= int(amount):
