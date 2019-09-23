@@ -1034,6 +1034,24 @@ class ElectrumX(SessionBase):
 
         return unspent
 
+    async def address_unspent_utxo_tokens(self, address, token, amount=0):
+        balance = await self.daemon_request("tokenbalance", address, token)
+        unspent = []
+
+        if balance["balance"] >= int(amount):
+            data = await self.daemon_request("tokenutxo", address, token)
+
+            for utxo in data:
+                unspent.append({
+                        "tx_hash": utxo["txid"],
+                        "tx_pos": utxo["outputIndex"],
+                        "value": utxo["satoshis"],
+                        "script": utxo["script"],
+                        "token": utxo["tokenName"]
+                    })
+
+        return unspent
+
     async def transaction_get_verbose(self, tx_hash, vin_start=0, vin_offset=20, vin_load=1):
         assert_tx_hash(tx_hash)
         tx_data = await self.daemon_request('getrawtransaction', tx_hash, True)
@@ -1372,6 +1390,7 @@ class ElectrumX(SessionBase):
             'blockchain.scripthash.listunspent': self.scripthash_listunspent,
             'blockchain.scripthash.subscribe': self.scripthash_subscribe,
             'blockchain.address.utxo': self.address_unspent_utxo,
+            'blockchain.address.utxo_tokens': self.address_unspent_utxo_tokens,
             'blockchain.transaction.inputs': self.transaction_inputs,
             'blockchain.transaction.broadcast': self.transaction_broadcast,
             'blockchain.transaction.get': self.transaction_get,

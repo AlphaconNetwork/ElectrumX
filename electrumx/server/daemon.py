@@ -270,6 +270,14 @@ class Daemon(object):
         '''Broadcast a transaction to the network.'''
         return await self._send_single('sendrawtransaction', (raw_tx, ))
 
+    async def tokenutxo(self, address, token):
+        '''Get address token utxos.'''
+        return await self._send_single('getaddressutxos', ({"addresses": [address], "tokenName": token}, ))
+
+    async def tokenbalance(self, address, token):
+        '''Get address token balance.'''
+        return await self._send_single('getaddressbalance', ({"addresses": [address], "tokenName": token}, ))
+
     async def height(self):
         '''Query the daemon for its current height.'''
         self._height = await self._send_single('getblockcount')
