@@ -978,7 +978,7 @@ class ElectrumX(SessionBase):
             current_amount_locked = 0
             current_amount_locked_time = 0
             for transaction in listunspent:
-                if transaction["height"] != 0:
+                if transaction["height"] != 0 and transaction["value"] > 0:
                     try:
                         data = await self.transaction_get(transaction["tx_hash"], True)
                         transaction["script"] = data["vout"][transaction["tx_pos"]]["scriptPubKey"]["hex"]
