@@ -143,6 +143,12 @@ class Coin(object):
                 cltv_script = script[len(script) - 25:]
                 return sha256(cltv_script).digest()[:HASHX_LEN]
 
+        # Check for OP_ALP_TOKEN
+        if len(script) == 49:
+            if script[25] == 0xc0:
+                token_script = script[len(script) - 25:]
+                return sha256(token_script).digest()[:HASHX_LEN]
+
         return sha256(script).digest()[:HASHX_LEN]
 
     @staticmethod
