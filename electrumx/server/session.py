@@ -1035,20 +1035,17 @@ class ElectrumX(SessionBase):
         return unspent
 
     async def address_unspent_utxo_tokens(self, address, token, amount=0):
-        balance = await self.daemon_request("tokenbalance", address, token)
         unspent = []
+        data = await self.daemon_request("tokenutxo", address, token)
 
-        if balance["balance"] >= int(amount):
-            data = await self.daemon_request("tokenutxo", address, token)
-
-            for utxo in data:
-                unspent.append({
-                        "tx_hash": utxo["txid"],
-                        "tx_pos": utxo["outputIndex"],
-                        "value": utxo["satoshis"],
-                        "script": utxo["script"],
-                        "token": utxo["tokenName"]
-                    })
+        for utxo in data:
+            unspent.append({
+                    "tx_hash": utxo["txid"],
+                    "tx_pos": utxo["outputIndex"],
+                    "value": utxo["satoshis"],
+                    "script": utxo["script"],
+                    "token": utxo["tokenName"]
+                })
 
         return unspent
 
